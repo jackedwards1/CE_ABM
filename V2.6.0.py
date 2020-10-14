@@ -1,5 +1,13 @@
 # Version 2.6.0
 
+"""
+This is the code used to produce the data used for my work. Please note that I do not have any formal
+training in code design, and I have built this model from scratch. I AM NOT an expert, so if you find any bugs,
+mistakes, or any other pieces of code that are inefficient/could otherwise be improved, please email me at
+jackedwards1@usf.edu. If you have any questions about what a parameter specifically does, or what the purpose of
+a function is, please direct them to the same email.
+"""
+
 
 # Imports
 import math
@@ -11,6 +19,10 @@ import random as rd
 import sys
 
 # Program Loop
+# These are the input parameters required when running the model. For ease of use:
+# python V2.6.0.py 1 X Y 10 1 off on reg
+# where X is the desired subdomain size and Y is the length of the simulation
+# valid subdomain sizes are: 25, 51, 101, 301, 601
 """
 Input Parameters:
 [0] File Name
@@ -24,6 +36,7 @@ Input Parameters:
 [8] Driver Impact
 """
 
+# Initialization
 initial = int(sys.argv[5])
 executions = int(sys.argv[1])
 gens = int(sys.argv[3])
@@ -129,7 +142,7 @@ gap_counter_y = frame_shift_g
 t_counter = 0
 initial_xes = 0
 
-# print('Starting array')
+
 # Array Establishment
 for y in xrange(0, max_grid):
     rows.append([])
@@ -173,7 +186,7 @@ for y in xrange(side_len / 2 - side_len + 1, side_len / 2 + 1):
         rows[max_grid // 2 + y][max_grid // 2 + x] = ['N', [0, 0], 0, 0, 0, 0, 0, 0, -12 + 110, 0]
         n_rows[max_grid // 2 + y][max_grid // 2 + x] = ['N', [0, 0], 0, 0, 0, 0, 0, 0, -12 + 110, 0]
 
-# print('Array done')
+# Cell Data Structure
 """
     ['0', [1, 1], 2, 3, 4, 5, 6, 7, 8, 9]
     [0]----Cell Type    'E'--Empty      'N'--Normal      'S'--Selfish      'C'--Cooperative         'X'--Membrane           'D'--Dead
@@ -1068,11 +1081,7 @@ def space_check():
         soft_grid_expansion('down', bottom_cell_list[0])
 
 
-# Executing divisions over time
-b_list = []
-p_list = []
-e_list = []
-
+# Format of muller_array
 """
 muller array clone indexing
 [0, 1, '2', '3', 4, 5, 6, 7, [8, ...]]
@@ -1086,7 +1095,14 @@ muller array clone indexing
 [7]----Fitness
 [8]----Population List
 """
+
+# Executing divisions over time
+
 for r in xrange(initial, executions + initial):
+    b_list = []
+    p_list = []
+    e_list = []
+
     index_r = r - initial
 
     population_stats = [[int(initial_cells ** 0.5) ** 2], [0], ['G']]
@@ -1140,6 +1156,7 @@ for r in xrange(initial, executions + initial):
             plt.savefig(image_file_name + str(r) + '_frame_0.png')
             plt.close('all')
 
+    # Generation Loop
     for t in xrange(1, gens + 1):
         #print('t = ' + str(t))
         t_counter += 1
@@ -1274,6 +1291,7 @@ for r in xrange(initial, executions + initial):
         #print('')
         #print('')
 
+    # Output File Writing
     h_stats = open("A_" + file_name + str(r) + file_type, "a")
     line_holder = 'Tumor ' + str(r) + ' Stats'
     h_stats.write(line_holder)
@@ -1446,95 +1464,8 @@ for r in xrange(initial, executions + initial):
     stats.write("\n")
     stats.close()
 
-    '''
-    f_stats = open("A_Frequencies_" + file_name + str(r) + file_type, "a")
-    clone_frequencies = []
-    total_pop = population_stats[0][gens]
-    extinct_clones = 0
-    for c in xrange(0, len(muller_array)):
-        if muller_array[c][8][gens] == 0:
-            extinct_clones += 1
-        else:
-            freq = float(muller_array[c][8][gens])/total_pop
-            clone_frequencies.append(freq)
-    output_freq_table = [[], []]
-    finest_resolution = 0.000001
-    freq_values = [0]
-    for q in range(1, 100):
-        freq_values.append(finest_resolution * q)
-    for q in range(0, 100):
-        freq_values.append(finest_resolution * 100 + (q * finest_resolution * 10))
-    for q in range(0, 100):
-        freq_values.append(finest_resolution * 1000 + (q * finest_resolution * 100))
-    for q in range(0, 10):
-        freq_values.append(finest_resolution * 10000 + (q * finest_resolution * 10000))
-    for q in range(0, 10):
-        freq_values.append(0.1 + 0.1 * q)
-    table_elements = len(freq_values)
-    for k in xrange(0, table_elements):
-        output_freq_table[0].append(freq_values[k])
-        clone_num = 0
-        if k == table_elements - 1:
-            for c in xrange(0, len(clone_frequencies)):
-                if clone_frequencies[c] >= freq_values[k]:
-                    clone_num += 1
-        else:
-            for c in xrange(0, len(clone_frequencies)):
-                if clone_frequencies[c] >= freq_values[k] and clone_frequencies[c] < freq_values[k + 1]:
-                    clone_num += 1
-        output_freq_table[1].append(clone_num)
-    line_holder_a = str(output_freq_table[0][0])
-    line_holder_b = str(output_freq_table[1][0])
-    for k in xrange(1, table_elements):
-        line_holder_a += ',' + str(output_freq_table[0][k])
-        line_holder_b += ',' + str(output_freq_table[1][k])
-    f_stats.write(line_holder_a)
-    f_stats.write("\n")
-    f_stats.write(line_holder_b)
-    f_stats.write("\n")
-    line_holder = str(len(clone_frequencies)) + ',' + str(extinct_clones) + ',' + str(len(clone_frequencies) + extinct_clones)
-    f_stats.write(line_holder)
-    f_stats.close()
-    '''
-
-
     # Parameter Re-establishment
     g_start = initial_grid
-    switch = 'on'
-    max_grid = 601
-    passenger_rate = 0.5
-    driver_rate = 0.07
-    selfish_bias = 0  # the amount favoring mutating selfish vs cooperative
-    base_fitness = 50  # in percent
-    selfish_driver_min = 0
-    selfish_driver_max = 0
-    cooperator_driver_min = 0
-    cooperator_driver_max = 0
-    if impact == 'low':
-        selfish_driver_min = 2.5
-        selfish_driver_max = 7.5
-        cooperator_driver_min = 2.5
-        cooperator_driver_max = 7.5
-    elif impact == 'reg':
-        selfish_driver_min = 10.5
-        selfish_driver_max = 20
-        cooperator_driver_min = 10.5
-        cooperator_driver_max = 20
-    switching_punishment = 1
-    switching_penalty = 10  # in percent
-    passenger_mod_range = 0.05  # in percent
-    mod_resolution = 0.001  # in percent
-    bin_number = 100
-    factor_produce_chance = 40  # in percent
-    base_death_rate = 15  # in percent
-    s_penalty = 0  # in percent
-    c_penalty = 0
-    factor_radius = 2
-    factor_threshold_perCell = 10
-    cell_density_threshold = 80  # in percent
-    chunk_size = 1
-    membrane_thickness = initial_membrane - 1
-    membrane_gap = initial_grid - 1
     gx_min = max_grid / 2 - g_start / 2 - 1
     gy_min = max_grid / 2 - g_start / 2 - 1
     gx_max = max_grid / 2 + g_start / 2 + 2
@@ -1627,702 +1558,3 @@ for r in xrange(initial, executions + initial):
         for x in xrange(side_len / 2 - side_len + 1, side_len / 2 + 1):
             rows[max_grid // 2 + y][max_grid // 2 + x] = ['N', [0, 0], 0, 0, 0, 0, 0, 0, -12 + 110, 0]
             n_rows[max_grid // 2 + y][max_grid // 2 + x] = ['N', [0, 0], 0, 0, 0, 0, 0, 0, -12 + 110, 0]
-
-"""
-    def factor_calc():
-    for Y in range(gy_min, gy_min + factor_radius):
-        for X in range(gx_min, gx_min + factor_radius):
-            factor_grid[Y][X] = 0
-            if 'X' not in n_rows[Y][X]:
-                up_radius = -Y
-                left_radius = -X
-                right_radius = factor_radius
-                down_radius = factor_radius
-                for y in range(up_radius, down_radius + 1):
-                    for x in range(left_radius, right_radius + 1):
-                        if 'E' not in n_rows[y + Y][x + X] and 'X' not in n_rows[y + Y][x + X]:
-                            if n_rows[y + Y][x + X][3] == 1:
-                                if abs(y) >= abs(x):
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(y)
-                                else:
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(x)
-        for X in range(gx_min + factor_radius, gx_max - factor_radius):
-            factor_grid[Y][X] = 0
-            if 'X' not in n_rows[Y][X]:
-                up_radius = -Y
-                left_radius = -factor_radius
-                right_radius = factor_radius
-                down_radius = factor_radius
-                for y in range(up_radius, down_radius + 1):
-                    for x in range(left_radius, right_radius + 1):
-                        if 'E' not in n_rows[y + Y][x + X] and 'X' not in n_rows[y + Y][x + X]:
-                            if n_rows[y + Y][x + X][3] == 1:
-                                if abs(y) >= abs(x):
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(y)
-                                else:
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(x)
-        for X in range(gx_max - factor_radius, gx_max):
-            factor_grid[Y][X] = 0
-            if 'X' not in n_rows[Y][X]:
-                up_radius = -Y
-                left_radius = -factor_radius
-                right_radius = gx_max - X
-                down_radius = factor_radius
-                for y in range(up_radius, down_radius + 1):
-                    for x in range(left_radius, right_radius):
-                        if 'E' not in n_rows[y + Y][x + X] and 'X' not in n_rows[y + Y][x + X]:
-                            if n_rows[y + Y][x + X][3] == 1:
-                                if abs(y) >= abs(x):
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(y)
-                                else:
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(x)
-    for Y in range(gy_min + factor_radius, gy_max - factor_radius):
-        for X in range(gx_min, gx_min + factor_radius):
-            factor_grid[Y][X] = 0
-            if 'X' not in n_rows[Y][X]:
-                up_radius = -factor_radius
-                left_radius = -X
-                right_radius = factor_radius
-                down_radius = factor_radius
-                for y in range(up_radius, down_radius + 1):
-                    for x in range(left_radius, right_radius + 1):
-                        if 'E' not in n_rows[y + Y][x + X] and 'X' not in n_rows[y + Y][x + X]:
-                            if n_rows[y + Y][x + X][3] == 1:
-                                if abs(y) >= abs(x):
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(y)
-                                else:
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(x)
-        for X in range(gx_min + factor_radius, gx_max - factor_radius):
-            factor_grid[Y][X] = 0
-            if 'X' not in n_rows[Y][X]:
-                up_radius = -factor_radius
-                left_radius = -factor_radius
-                right_radius = factor_radius
-                down_radius = factor_radius
-                for y in range(up_radius, down_radius + 1):
-                    for x in range(left_radius, right_radius + 1):
-                        if 'E' not in n_rows[y + Y][x + X] and 'X' not in n_rows[y + Y][x + X]:
-                            if n_rows[y + Y][x + X][3] == 1:
-                                if abs(y) >= abs(x):
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(y)
-                                else:
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(x)
-        for X in range(gx_max - factor_radius, gx_max):
-            factor_grid[Y][X] = 0
-            if 'X' not in n_rows[Y][X]:
-                up_radius = -factor_radius
-                left_radius = -factor_radius
-                right_radius = gx_max - X
-                down_radius = factor_radius
-                for y in range(up_radius, down_radius + 1):
-                    for x in range(left_radius, right_radius):
-                        if 'E' not in n_rows[y + Y][x + X] and 'X' not in n_rows[y + Y][x + X]:
-                            if n_rows[y + Y][x + X][3] == 1:
-                                if abs(y) >= abs(x):
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(y)
-                                else:
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(x)
-    for Y in range(gy_max - factor_radius, gy_max):
-        for X in range(gx_min, gx_min + factor_radius):
-            factor_grid[Y][X] = 0
-            if 'X' not in n_rows[Y][X]:
-                up_radius = -factor_radius
-                left_radius = -X
-                right_radius = factor_radius
-                down_radius = gy_max - Y
-                for y in range(up_radius, down_radius):
-                    for x in range(left_radius, right_radius + 1):
-                        if 'E' not in n_rows[y + Y][x + X] and 'X' not in n_rows[y + Y][x + X]:
-                            if n_rows[y + Y][x + X][3] == 1:
-                                if abs(y) >= abs(x):
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(y)
-                                else:
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(x)
-        for X in range(gx_min + factor_radius, gx_max - factor_radius):
-            factor_grid[Y][X] = 0
-            if 'X' not in n_rows[Y][X]:
-                up_radius = -factor_radius
-                left_radius = -factor_radius
-                right_radius = factor_radius
-                down_radius = gy_max - Y
-                for y in range(up_radius, down_radius):
-                    for x in range(left_radius, right_radius + 1):
-                        if 'E' not in n_rows[y + Y][x + X] and 'X' not in n_rows[y + Y][x + X]:
-                            if n_rows[y + Y][x + X][3] == 1:
-                                if abs(y) >= abs(x):
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(y)
-                                else:
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(x)
-        for X in range(gx_max - factor_radius, gx_max):
-            factor_grid[Y][X] = 0
-            if 'X' not in n_rows[Y][X]:
-                up_radius = -factor_radius
-                left_radius = -factor_radius
-                right_radius = gx_max - X
-                down_radius = gy_max - Y
-                for y in range(up_radius, down_radius):
-                    for x in range(left_radius, right_radius):
-                        if 'E' not in n_rows[y + Y][x + X] and 'X' not in n_rows[y + Y][x + X]:
-                            if n_rows[y + Y][x + X][3] == 1:
-                                if abs(y) >= abs(x):
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(y)
-                                else:
-                                    factor_grid[Y][X] += factor_radius + 1 - abs(x)
-
-    
-    
-    g_start = initial_grid
-    max_grid = 600
-    gens = 50
-    passenger_rate = 0.5
-    driver_rate = 0.07
-    selfish_bias = 0  # the amount favoring mutating selfish vs cooperative
-    base_fitness = 50  # in percent
-    selfish_driver_min = 10  # in percent
-    selfish_driver_max = 20.5  # in percent
-    cooperator_driver_min = 10  # in percent----
-    cooperator_driver_max = 20.5  # in percent----
-    switching_punishment = 1
-    switching_penalty = 10  # in percent
-    passenger_mod_range = 0.5  # in percent
-    mod_resolution = 0.01  # in percent
-    bin_number = 100
-    factor_produce_chance = 40  # in percent
-    base_death_rate = 15  # in percent
-    s_penalty = 0  # in percent
-    c_penalty = 0
-    factor_radius = 2
-    factor_threshold_perCell = 10
-    cell_density_threshold = 80  # in percent
-    chunk_size = 1
-    membrane_thickness = initial_membrane - 1
-    membrane_gap = initial_grid - 1
-    gx_min = max_grid / 2 - g_start / 2 - 1
-    gy_min = max_grid / 2 - g_start / 2 - 1
-    gx_max = max_grid / 2 + g_start / 2 + 2
-    gy_max = max_grid / 2 + g_start / 2 + 2
-    rows = []
-    n_rows = []
-    data_rows = np.zeros((max_grid, max_grid))
-    factor_grid = np.zeros((max_grid, max_grid))
-    gsize = 1
-    m_y = 2000
-    scaling = 3
-    m_x = gens * scaling
-    division_counter = 0
-    mutation_counter = 0
-    driver_counter = 0
-
-    tiles = max_grid / float(membrane_thickness + membrane_gap + 2)
-    if tiles != int(tiles):
-        tiles += 1
-    tiles = int(tiles)
-    if tiles / 2 == tiles / float(2):
-        frame_shift_g = membrane_gap / 2 + membrane_thickness / 2 + 1
-        frame_shift_m = 0
-    else:
-        frame_shift_g = membrane_gap + 1
-        frame_shift_m = membrane_thickness / 2
-    if g_start == 101:
-        frame_shift_g = 2 * membrane_gap / 3 + membrane_thickness / 2
-        frame_shift_m = 0
-    membrane_counter_x = frame_shift_m
-    gap_counter_x = frame_shift_g
-    membrane_counter_y = frame_shift_m
-    gap_counter_y = frame_shift_g
-
-    # print('Starting array')
-    # Array Establishment
-    for y in range(0, max_grid):
-        rows.append([])
-        n_rows.append([])
-        for x in range(0, max_grid):
-            rows[y].append(['E'])
-            n_rows[y].append(['E'])
-    for y in range(0, max_grid):
-        for x in range(0, max_grid):
-            if gap_counter_x <= membrane_gap:
-                gap_counter_x += 1
-            elif membrane_counter_x <= membrane_thickness:
-                rows[y][x] = ['X']
-                n_rows[y][x] = ['X']
-                membrane_counter_x += 1
-            else:
-                gap_counter_x = 1
-                membrane_counter_x = 0
-        gap_counter_x = frame_shift_g
-        membrane_counter_x = frame_shift_m
-    for x in range(0, max_grid):
-        for y in range(0, max_grid):
-            if gap_counter_y <= membrane_gap:
-                gap_counter_y += 1
-            elif membrane_counter_y <= membrane_thickness:
-                rows[y][x] = ['X']
-                n_rows[y][x] = ['X']
-                membrane_counter_y += 1
-            else:
-                gap_counter_y = 1
-                membrane_counter_y = 0
-        gap_counter_y = frame_shift_g
-        membrane_counter_y = frame_shift_m
-    side_len = int(initial_cells ** 0.5)
-    for y in range(side_len / 2 - side_len + 1, side_len / 2 + 1):
-        for x in range(side_len / 2 - side_len + 1, side_len / 2 + 1):
-            rows[max_grid // 2 + y][max_grid // 2 + x] = ['N', [0, 0], 0, 0, 0, 0, 0]
-            n_rows[max_grid // 2 + y][max_grid // 2 + x] = ['N', [0, 0], 0, 0, 0, 0, 0]
-            
-    
-    m_stats = open(muller_file_name, "a")
-    m_stats.write("Muller Plot Data")
-    m_stats.write("\n")
-    m_stats.write("Population List Start")
-    m_stats.write("\n")
-    for t in range(0, gens + 1):
-        m_stats.write(str(population_stats[0][t]))
-        m_stats.write("\n")
-    m_stats.write("Population List End")
-    m_stats.write("\n")
-    m_stats.write("\n")
-
-    m_stats.write("Ancestor List Start")
-    m_stats.write("\n")
-    for a in range(0, len(ancestor_list)):
-        for q in range(0, 3):
-            m_stats.write(str(ancestor_list[a][q]))
-            m_stats.write("\n")
-    m_stats.write("Ancestor List End")
-    m_stats.write("\n")
-    m_stats.write("\n")
-
-    m_stats.write("Muller Array Start")
-    m_stats.write("\n")
-    for m in range(0, len(muller_array)):
-        m_stats.write(str(muller_array[m][0]))
-        m_stats.write("\n")
-        m_stats.write(str(muller_array[m][1]))
-        m_stats.write("\n")
-        for t in range(0, gens + 1):
-            m_stats.write(str(muller_array[m][2][t]))
-            m_stats.write("\n")
-    m_stats.write("Muller Array End")
-    m_stats.write("\n")
-    m_stats.close()
-
-    total_pop = population_stats[0][gens]
-    c_pop = population_stats[1][gens]
-    cooperator_list[index_r].append(total_pop)
-    if c_pop > 0:
-        cooperator_list[index_r].append(c_pop / float(total_pop))
-        cooperator_list[index_r].append(c_pop)
-    else:
-        cooperator_list[index_r].append(0)
-        cooperator_list[index_r].append(0)
-    if total_pop <= initial_grid ** 2 + initial_grid:
-        cooperator_list[index_r].append('Null')
-    else:
-        cooperator_list[index_r].append('Valid')
-"""
-
-"""
-        border_delay += 15
-        if r == 20:
-            seeding_grid_low_y = grid_size_y // 3 + 1
-            seeding_grid_high_y = 2 * grid_size_y // 3
-            seeding_grid_low_x = grid_size_x // 3 + 1
-            seeding_grid_high_x = 2 * grid_size_x // 3
-            expansion_size = 30
-        if r == 30:
-            expansion_size = 15
-            seeding_grid_low = 25
-            seeding_grid_high_y = grid_size_y - 24
-            seeding_grid_high_x = grid_size_x - 24
-        gsize = 450 / ((grid_size_y + grid_size_x)/2)
-        expansions = 0
-        rows = []
-        n_rows = []
-        for y in range(0, grid_size_y):
-            rows.append([])
-            n_rows.append([])
-            for x in range(0, grid_size_x):
-                rows[y].append(['E'])
-                n_rows[y].append(['E'])
-        for y in range(seeding_grid_low_y, seeding_grid_high_y):
-            for x in range(seeding_grid_low_x, seeding_grid_high_x):
-                rows[y][x] = ['H', rd.randint(0, lifespan - 2), 0, [[0, 0]], []]
-                n_rows[y][x] = ['H', rd.randint(0, lifespan - 2), 0, [[0, 0]], []]
-        data_rows = np.zeros((grid_size_y, grid_size_x))
-
-    print(str(l) + ' executions completed')
-
-
-    # Legends
-    count = 1
-    grid_size = (mutation_number + 2) * 4
-    data_rows = np.zeros((grid_size, grid_size))
-    for y in range(0, grid_size):
-        for x in range(0, grid_size):
-            data_rows[y][x] = count
-        if count < mutation_number + 2 and (y + 1) // 4 == (y + 1)/ 4:
-            count += 1
-
-    Space = np.array(data_rows)
-    size = np.array(Space.shape) * gsize
-    dpi = 72.0
-    figsize = size[1] / float(dpi), size[0] / float(dpi)
-    fig = plt.figure(figsize=figsize, dpi=dpi, facecolor="white")
-    fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
-    plt.imshow(Space, interpolation='nearest', cmap=plt.cm.nipy_spectral_r, vmin=1, vmax=mutation_number + 2)
-    plt.xticks([]), plt.yticks([])
-    plt.title('Legend')
-    plt.savefig(file_name + 'Mutation Tracking Key.png')
-    plt.close('all')
-
-    P_cells_1 = 0
-    A_cells_1 = 0
-    I_cells_1 = 0
-    for y in range(0, grid_size):
-        for x in range(0, grid_size):
-            if 'M' in n_rows[y][x] and len(n_rows[y][x]) <= 3:
-                pass
-            elif 'E' in n_rows[y][x]:
-                pass
-            elif 'P1' in n_rows[y][x][3]:
-                P_cells_1 += 1
-            elif 'P2' in n_rows[y][x][3]:
-                P_cells_1 += 1
-            elif 'P3' in n_rows[y][x][3]:
-                P_cells_1 += 1
-            elif 'P4' in n_rows[y][x][3]:
-                P_cells_1 += 1
-            elif 'P5' in n_rows[y][x][3]:
-                P_cells_1 += 1
-            elif 'A1' in n_rows[y][x][3]:
-                A_cells_1 += 1
-            elif 'A2' in n_rows[y][x][3]:
-                A_cells_1 += 1
-            elif 'A3' in n_rows[y][x][3]:
-                A_cells_1 += 1
-            elif 'A4' in n_rows[y][x][3]:
-                A_cells_1 += 1
-            elif 'A5' in n_rows[y][x][3]:
-                A_cells_1 += 1
-            elif 'I1' in n_rows[y][x][3]:
-                I_cells_1 += 1
-            elif 'I2' in n_rows[y][x][3]:
-                I_cells_1 += 1
-            elif 'I3' in n_rows[y][x][3]:
-                I_cells_1 += 1
-            elif 'I4' in n_rows[y][x][3]:
-                I_cells_1 += 1
-            elif 'I5' in n_rows[y][x][3]:
-                I_cells_1 += 1
-
-    P_1_popu_list.append(P_cells_1)
-    A_1_popu_list.append(A_cells_1)
-    I_1_popu_list.append(I_cells_1)
-    P_1_prop_list.append(P_cells_1 / cell_total)
-    A_1_prop_list.append(A_cells_1 / cell_total)
-    I_1_prop_list.append(I_cells_1 / cell_total)
-    #print(P_cells_1)
-    #print(A_cells_1)
-    #print(I_cells_1)
-    #print('')
-    #print('')
-    #print('')
-
-
-
-plt.plot(range(0, gens + 1), P_prop_list, label='Frequently Proliferating Cells', linewidth=1)
-plt.plot(range(0, gens + 1), A_prop_list, label='Self Sustaining Cells', linewidth=1)
-plt.plot(range(0, gens + 1), I_prop_list, label='Invasive Cells', linewidth=1)
-plt.plot(range(0, gens + 1), stem_prop_list, label='Original Cells', linewidth=1)
-plt.axis([1, gens + 1, 0, 1.2])
-plt.ylabel('Proportion of population')
-plt.xlabel('Generation')
-plt.legend()
-plt.savefig(file_name+' proportion plot.png')
-plt.close('all')
-
-plt.plot(range(0, gens + 1), P_popu_list, label='Frequently Proliferating Cells', linewidth=1)
-plt.plot(range(0, gens + 1), A_popu_list, label='Self Sustaining Cells', linewidth=1)
-plt.plot(range(0, gens + 1), I_popu_list, label='Invasive Cells', linewidth=1)
-plt.plot(range(0, gens + 1), stem_popu_list, label='Original Cells', linewidth=1)
-plt.axis([1, gens + 1, 0, cell_total])
-plt.ylabel('Number of Cells')
-plt.xlabel('Generation')
-plt.legend()
-plt.savefig(file_name+' separate population plot.png')
-plt.close('all')
-
-plt.plot(range(0, gens + 1), P_1_prop_list, label='Frequently Proliferating Cells', linewidth=1)
-plt.plot(range(0, gens + 1), A_1_prop_list, label='Self Sustaining Cells', linewidth=1)
-plt.plot(range(0, gens + 1), I_1_prop_list, label='Invasive Cells', linewidth=1)
-plt.plot(range(0, gens + 1), stem_prop_list, label='Original Cells', linewidth=1)
-plt.axis([1, gens + 1, 0, 1.2])
-plt.ylabel('Proportion of population')
-plt.xlabel('Generation')
-plt.legend()
-plt.savefig(file_name+' proportion plot_1.png')
-plt.close('all')
-
-plt.plot(range(0, gens + 1), P_1_popu_list, label='Frequently Proliferating Cells', linewidth=1)
-plt.plot(range(0, gens + 1), A_1_popu_list, label='Self Sustaining Cells', linewidth=1)
-plt.plot(range(0, gens + 1), I_1_popu_list, label='Invasive Cells', linewidth=1)
-plt.plot(range(0, gens + 1), stem_popu_list, label='Original Cells', linewidth=1)
-plt.axis([1, gens + 1, 0, cell_total])
-plt.ylabel('Number of Cells')
-plt.xlabel('Generation')
-plt.legend()
-plt.savefig(file_name+' separate population plot_1.png')
-plt.close('all')
-"""
-
-'''
-# Bottom Edge
-        for L in range(0, factor_radius):
-            cell_density = 0
-            up_radius = -factor_radius - 1
-            left_radius = -L
-            right_radius = factor_radius
-            for y in range(grid_size_y + up_radius, grid_size_y):
-                for x in range(left_radius, right_radius + 1):
-                    if 'E' in n_rows[y][L + x]:
-                        pass
-                    elif 'X' in n_rows[y][L + x]:
-                        pass
-                    else:
-                        if n_rows[y][L + x][3] == 1:
-                            cell_density += 1
-            factor_density[0][L] = cell_density
-        for L in range(factor_radius, grid_size_x - factor_radius):
-            cell_density = 0
-            up_radius = -factor_radius - 1
-            left_radius = -factor_radius
-            right_radius = factor_radius
-            for y in range(grid_size_y + up_radius, grid_size_y):
-                for x in range(left_radius, right_radius + 1):
-                    if 'E' in n_rows[y][L + x]:
-                        pass
-                    elif 'X' in n_rows[y][L + x]:
-                        pass
-                    else:
-                        if n_rows[y][L + x][3] == 1:
-                            cell_density += 1
-            factor_density[0][L] = cell_density
-        for L in range(grid_size_x - factor_radius, grid_size_x):
-            cell_density = 0
-            up_radius = -factor_radius - 1
-            left_radius = -factor_radius
-            right_radius = grid_size_x - L
-            for y in range(grid_size_y + up_radius, grid_size_y):
-                for x in range(left_radius, right_radius):
-                    if 'E' in n_rows[y][L + x]:
-                        pass
-                    elif 'X' in n_rows[y][L + x]:
-                        pass
-                    else:
-                        if n_rows[y][L + x][3] == 1:
-                            cell_density += 1
-                        pass
-
-    for X in range(0, grid_size_x):
-        # Left Edge
-        for L in range(0, factor_radius):
-            cell_density = 0
-            up_radius = -L
-            right_radius = factor_radius
-            down_radius = factor_radius
-            for y in range(up_radius, down_radius + 1):
-                for x in range(0, right_radius + 1):
-                    if 'E' in n_rows[L + y][x]:
-                        pass
-                    elif 'X' in n_rows[L + y][x]:
-                        pass
-                    else:
-                        if n_rows[L + y][x][3] == 1:
-                            cell_density += 1
-            factor_density[L][0] = cell_density
-        for L in range(factor_radius, grid_size_y - factor_radius):
-            cell_density = 0
-            up_radius = -factor_radius
-            right_radius = factor_radius
-            down_radius = factor_radius
-            for y in range(up_radius, down_radius + 1):
-                for x in range(0, right_radius + 1):
-                    if 'E' in n_rows[L + y][x]:
-                        pass
-                    elif 'X' in n_rows[L + y][x]:
-                        pass
-                    else:
-                        if n_rows[L + y][x][3] == 1:
-                            cell_density += 1
-            factor_density[L][0] = cell_density
-        for L in range(grid_size_y - factor_radius, grid_size_y):
-            cell_density = 0
-            up_radius = -factor_radius
-            right_radius = factor_radius
-            down_radius = grid_size_y - L
-            for y in range(up_radius, down_radius):
-                for x in range(0, right_radius + 1):
-                    if 'E' in n_rows[L + y][x]:
-                        pass
-                    elif 'X' in n_rows[L + y][x]:
-                        pass
-                    else:
-                        if n_rows[L + y][x][3] == 1:
-                            cell_density += 1
-            factor_density[L][0] = cell_density
-
-        # Right Edge
-        for L in range(0, factor_radius):
-            cell_density = 0
-            up_radius = -L
-            left_radius = -factor_radius - 1
-            down_radius = factor_radius
-            for y in range(up_radius, down_radius + 1):
-                for x in range(grid_size_x + left_radius, grid_size_x):
-                    if 'E' in n_rows[L + y][x]:
-                        pass
-                    elif 'X' in n_rows[L + y][x]:
-                        pass
-                    else:
-                        if n_rows[L + y][x][3] == 1:
-                            cell_density += 1
-            factor_density[L][0] = cell_density
-        for L in range(factor_radius, grid_size_y - factor_radius):
-            cell_density = 0
-            up_radius = -factor_radius
-            left_radius = -factor_radius - 1
-            down_radius = factor_radius
-            for y in range(up_radius, down_radius + 1):
-                for x in range(grid_size_x + left_radius, grid_size_x):
-                    if 'E' in n_rows[L + y][x]:
-                        pass
-                    elif 'X' in n_rows[L + y][x]:
-                        pass
-                    else:
-                        if n_rows[L + y][x][3] == 1:
-                            cell_density += 1
-            factor_density[L][0] = cell_density
-        for L in range(grid_size_y - factor_radius, grid_size_y):
-            cell_density = 0
-            up_radius = -factor_radius
-            left_radius = -factor_radius + 1
-            down_radius = grid_size_y - L
-            for y in range(up_radius, down_radius):
-                for x in range(grid_size_x + left_radius, grid_size_x):
-                    if 'E' in n_rows[L + y][x]:
-                        pass
-                    elif 'X' in n_rows[L + y][x]:
-                        pass
-                    else:
-                        if n_rows[L + y][x][3] == 1:
-                            cell_density += 1
-            factor_density[L][0] = cell_density
-
-        factors = np.zeros((grid_size_y, grid_size_x))
-        for y in range(0, grid_size_y):
-            for x in range(0, grid_size_x):
-                if 'E' in n_rows[y][x]:
-                    pass
-                elif 'X' in n_rows[y][x]:
-                    pass
-                else:
-                    if n_rows[y][x][3] == 1:
-                        factors[y][x] += 1
-        print(factors)
-        print('')
-        print(factor_density)
-
-
-    cell_list = []
-    for y in range(0, grid_size_y):
-        for x in range(0, grid_size_x):
-            if 'E' in rows[y][x]:
-                pass
-            elif 'X' in rows[y][x]:
-                cell_list.append([y, x, 'X'])
-
-    if len(cell_list) <= 0:
-        return
-    rd.shuffle(cell_list)
-    while len(cell_list) > 0:
-        if cell_list[0][0] != 0 and cell_list[0][1] != 0 and cell_list[0][0] != (grid_size_y - 1) \
-                and cell_list[0][1] != (grid_size_x - 1):
-            space_check(cell_list[0][0], cell_list[0][1], [0])
-        elif cell_list[0][0] == 0 and cell_list[0][1] == 0:
-            space_check(0, 0, [1, 2, 3, 4, 6])
-        elif cell_list[0][0] == 0 and cell_list[0][1] == (grid_size_x - 1):
-            space_check(0, grid_size_x - 1, [1, 2, 3, 5, 8])
-        elif cell_list[0][0] == (grid_size_y - 1) and cell_list[0][1] == 0:
-            space_check(grid_size_y - 1, 0, [1, 4, 6, 7, 8])
-        elif cell_list[0][0] == (grid_size_y - 1) and cell_list[0][1] == (grid_size_x - 1):
-            space_check(grid_size_y - 1, grid_size_x - 1, [3, 5, 6, 7, 8])
-        elif cell_list[0][0] == 0 and cell_list[0][1] != 0 and cell_list[0][1] != (grid_size_x - 1):
-            space_check(0, cell_list[0][1], [1, 2, 3])
-        elif cell_list[0][0] == (grid_size_y - 1) and cell_list[0][1] != 0 and cell_list[0][1] != (grid_size_x - 1):
-            space_check(grid_size_y - 1, cell_list[0][1], [6, 7, 8])
-        elif cell_list[0][0] != 0 and cell_list[0][0] != (grid_size_y - 1) and cell_list[0][1] == 0:
-            space_check(cell_list[0][0], 0, [1, 4, 6])
-        elif cell_list[0][0] != 0 and cell_list[0][0] != (grid_size_y - 1) and cell_list[0][1] == (grid_size_x - 1):
-            space_check(cell_list[0][0], (grid_size_x - 1), [3, 5, 8])
-        del cell_list[0]
-
-
-def space_check(fi, si, restriction_list):
-    if 1 not in restriction_list:
-        if 'X' in n_rows[fi - 1][si - 1]:
-            pass
-        else:
-            if factor_density[fi - 1][si - 1] > factor_threshold:
-                n_rows[fi][si] = 'E'
-                return
-    if 2 not in restriction_list:
-        if 'X' in n_rows[fi - 1][si]:
-            pass
-        else:
-            if factor_density[fi - 1][si] > factor_threshold:
-                n_rows[fi][si] = 'E'
-                return
-    if 3 not in restriction_list:
-        if 'X' in n_rows[fi - 1][si + 1]:
-            pass
-        else:
-            if factor_density[fi - 1][si + 1] > factor_threshold:
-                n_rows[fi][si] = 'E'
-                return
-    if 4 not in restriction_list:
-        if 'X' in n_rows[fi][si - 1]:
-            pass
-        else:
-            if factor_density[fi][si - 1] > factor_threshold:
-                n_rows[fi][si] = 'E'
-                return
-    if 5 not in restriction_list:
-        if 'E' in n_rows[fi][si + 1]:
-
-    if 6 not in restriction_list:
-        if 'E' in n_rows[fi + 1][si - 1]:
-
-    if 7 not in restriction_list:
-        if 'E' in n_rows[fi + 1][si]:
-
-    if 8 not in restriction_list:
-        if 'E' in n_rows[fi + 1][si + 1]:
-
-
-'''
-
-"""
-    for y in range(seeding_grid_low_y, seeding_grid_high_y):
-        for x in range(seeding_grid_low_x, seeding_grid_high_x):
-            rand_mut = 0
-            if rd.randint(1, 100) <= 0:
-                rd.shuffle(mutation_list_global)
-                rand_mut = mutation_list_global[0]
-                rows[y][x] = ['H', rd.randint(0, lifespan - 2), rand_mut, [[rand_mut, 0]], [mutation_type + str(rand_mut)]]
-                n_rows[y][x] = ['H', rd.randint(0, lifespan - 2), rand_mut, [[rand_mut, 0]], [mutation_type + str(rand_mut)]]
-            else:
-                rows[y][x] = ['H', rd.randint(0, lifespan - 2), 0, [[0, 0]], []]
-                n_rows[y][x] = ['H', rd.randint(0, lifespan - 2), 0, [[0, 0]], []]
-"""
